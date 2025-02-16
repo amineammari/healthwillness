@@ -48,7 +48,7 @@ class UserType extends AbstractType
                 'type' => PasswordType::class,
                 'invalid_message' => 'Les mots de passe doivent correspondre.',
                 'options' => ['attr' => ['class' => 'form-control password-field']],
-                'required' => true,
+                'required' => $options['is_new'], // Only require password for new users
                 'first_options'  => ['label' => 'Mot de passe'],
                 'second_options' => ['label' => 'Confirmer le mot de passe'],
                 'constraints' => [
@@ -89,6 +89,7 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'is_new' => true, // Default to true for new users
         ]);
     }
 }
