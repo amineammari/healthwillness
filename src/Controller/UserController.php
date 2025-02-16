@@ -111,4 +111,43 @@ class UserController extends AbstractController
 
         return $this->redirectToRoute('user_index');
     }
+
+    #[Route('/profile', name: 'user_profile', methods: ['GET', 'POST'])]
+    public function profile(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hash the plain password if it's provided
+            $plainPassword = $form->get('plainPassword')->getData();
+            if ($plainPassword) {
+                $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+                $user->setPassword($hashedPassword);
+            }
+
+            // Handle file upload
+            /** @var UploadedFile $photoFile */
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $newFilename = uniqid().'.'.$photoFile->guessExtension();
+                $photoFile->move($this->getParameter('uploads_directory'), $newFilename);
+                $user->setPhoto($newFilename);
+            }
+
+            $entityManager->flush();
+
+            return $this->redirectToRoute('user_profile');
+        }
+
+        return $this->render('user/profile.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+        ]);
+    }
 }
