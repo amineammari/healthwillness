@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User List{% endblock %}
+
+{% block body %}
+    <h1>User List</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Date de Naissance</th>
+                <th>Photo</th>
+                <th>Rôle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.nom }}</td>
+                    <td>{{ user.prenom }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.dateNaissance ? user.dateNaissance|date('Y-m-d') : '' }}</td>
+                    <td>
+                        {% if user.photo %}
+                            <img src="{{ asset('uploads/' ~ user.photo) }}" alt="User Photo" width="50">
+                        {% else %}
+                            No Photo
+                        {% endif %}
+                    </td>
+                    <td>{{ user.role }}</td>
+                    <td>
+                        <a href="{{ path('user_edit', {'id': user.id}) }}" class="btn btn-primary">Edit</a>
+                        <form method="post" action="{{ path('user_delete', {'id': user.id}) }}" style="display:inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                            <button class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('user_new') }}" class="btn btn-success">Create New User</a>
+{% endblock %}
